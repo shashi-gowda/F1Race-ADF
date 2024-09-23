@@ -1,0 +1,14 @@
+{
+	"name": "ls_F1_DBW",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDatabricks",
+		"typeProperties": {
+			"domain": "https://adb-1535347822616342.2.azuredatabricks.net",
+			"authentication": "MSI",
+			"workspaceResourceId": "/subscriptions/8acd2382-154b-4a27-9d21-e53991d9370a/resourceGroups/F1-rg/providers/Microsoft.Databricks/workspaces/F1-DBW",
+			"existingClusterId": "0923-060349-z9za5jko"
+		}
+	}
+}

@@ -1,0 +1,322 @@
+{
+	"name": "pl_ingestFiles_F1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get folder details",
+				"description": "f1 races might not happe every week and hence pipeline may fail so to avoid that we use metadata activity to check and only run if we have f1 data for that week",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ds_formula1_raw",
+						"type": "DatasetReference",
+						"parameters": {
+							"p_window_end_date": {
+								"value": "@pipeline().parameters.p_window_end_date",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			},
+			{
+				"name": "If Folder Exists",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Get folder details",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@activity('Get folder details').output.exists",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Ingest circuits file",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/F1Project/Ingestion/1.ingest_circuits",
+								"baseParameters": {
+									"p_data_source": {
+										"value": "@variables('v_data_source')",
+										"type": "Expression"
+									},
+									"p_file_date": {
+										"value": "@formatDateTime(pipeline().parameters.p_window_end_date, 'yyyy-MM-dd')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_F1_DBW",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest races file",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/F1Project/Ingestion/2.ingest_races",
+								"baseParameters": {
+									"p_data_source": {
+										"value": "@variables('v_data_source')",
+										"type": "Expression"
+									},
+									"p_file_date": {
+										"value": "@formatDateTime(pipeline().parameters.p_window_end_date, 'yyyy-MM-dd')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_F1_DBW",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest constructors file",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/F1Project/Ingestion/3.ingest_constructors",
+								"baseParameters": {
+									"p_data_source": {
+										"value": "@variables('v_data_source')",
+										"type": "Expression"
+									},
+									"p_file_date": {
+										"value": "@formatDateTime(pipeline().parameters.p_window_end_date, 'yyyy-MM-dd')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_F1_DBW",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest drivers file",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/F1Project/Ingestion/4.ingest_drivers",
+								"baseParameters": {
+									"p_data_source": {
+										"value": "@variables('v_data_source')",
+										"type": "Expression"
+									},
+									"p_file_date": {
+										"value": "@formatDateTime(pipeline().parameters.p_window_end_date, 'yyyy-MM-dd')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_F1_DBW",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest results file",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/F1Project/Ingestion/5.ingest_results",
+								"baseParameters": {
+									"p_data_source": {
+										"value": "@variables('v_data_source')",
+										"type": "Expression"
+									},
+									"p_file_date": {
+										"value": "@formatDateTime(pipeline().parameters.p_window_end_date, 'yyyy-MM-dd')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_F1_DBW",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest pit_stops file",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/F1Project/Ingestion/6.ingest_pit_stops",
+								"baseParameters": {
+									"p_data_source": {
+										"value": "@variables('v_data_source')",
+										"type": "Expression"
+									},
+									"p_file_date": {
+										"value": "@formatDateTime(pipeline().parameters.p_window_end_date, 'yyyy-MM-dd')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_F1_DBW",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest lap_times file",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/F1Project/Ingestion/7.ingest_lap_times",
+								"baseParameters": {
+									"p_data_source": {
+										"value": "@variables('v_data_source')",
+										"type": "Expression"
+									},
+									"p_file_date": {
+										"value": "@formatDateTime(pipeline().parameters.p_window_end_date, 'yyyy-MM-dd')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_F1_DBW",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest qualifying file",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/F1Project/Ingestion/8.ingest_qualifying",
+								"baseParameters": {
+									"p_data_source": {
+										"value": "@variables('v_data_source')",
+										"type": "Expression"
+									},
+									"p_file_date": {
+										"value": "@formatDateTime(pipeline().parameters.p_window_end_date, 'yyyy-MM-dd')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_F1_DBW",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_window_end_date": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"v_data_source": {
+				"type": "String",
+				"defaultValue": "Ergast API"
+			}
+		},
+		"folder": {
+			"name": "F1-Pipelines"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-09-23T07:22:28Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,70 @@
+{
+	"name": "pl_process_formula1_master",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute Ingestion pipeline",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_ingestFiles_F1",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_window_end_date": {
+							"value": "@pipeline().parameters.p_window_end_date",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute transform pipeline",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Ingestion pipeline",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_transformFiles_F1",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_window_end_date": {
+							"value": "@pipeline().parameters.p_window_end_date",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"p_window_end_date": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "F1-Pipelines"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-09-23T07:33:27Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
